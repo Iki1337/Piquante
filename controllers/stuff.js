@@ -70,61 +70,68 @@ exports.getAllThing = (req, res, next) => {
 };
 
 exports.like = (req, res, next) => {
-  console.log(req.body);
-  console.log(req.params.id);
 
-  Thing.findOne({ _id: req.params.id })
-    .then(
-      thing => {
-        console.log(thing);
-        if(req.body.like == 1){
-          thing.likes += 1;
-        }
-        Thing.updateOne({ _id: req.params.id }, { thing, _id: req.params.id })
-          .then(() => res.status(200).json({ message: 'Objet modifié !'}))
-          .catch(error => res.status(400).json({ error }));
-      }
-    )
-    .catch(error => res.status(500).json({ error }));
+  console.log(req.body.like);
 
-  /*Thing.findOne({ _id: req.params.id })
-    .then(
-      thing => {
-        const object = new Thing({
-          //...thing
-          userId: thing.userId,
-          name: thing.name,
-          manufacturer: thing.manufacturer,
-          description: thing.description,
-          mainPepper: thing.mainPepper,
-          imageUrl: thing.imageUrl,
-          heat: thing.heat,
-          likes: thing.likes,
-          dislikes: thing.dislikes,
-          usersLiked: thing.usersLiked,
-          usersDisliked: thing.usersDisliked
-        });
-        if(req.body.like == 1){
-          object.likes += 1;
-          console.log(object.imageUrl);
+  switch (req.body.like) {
+
+    case 1:
+      Thing.updateOne({ _id: req.params.id }, {$push: {usersLiked: req.body.userId}, $inc: {likes: 1}})
+        .then(() => res.status(200).json({ message: 'Like modifié !'}))
+        .catch(error => res.status(400).json({ error }));
+      
+      break;
+
+    case -1:
+      Thing.updateOne({ _id: req.params.id }, {$push: {usersDisliked: req.body.userId}, $inc: {dislikes: 1}})
+        .then(() => res.status(200).json({ message: 'Dislike modifié !'}))
+        .catch(error => res.status(400).json({ error }));
+      
+      break;
+
+    case 0:
+      Thing.findOne({ _id: req.params.id })
+      .then(thing => {
+        if (thing.usersLiked.find((user) => user === req.body.userId)) {
+          Thing.updateOne({ _id: req.params.id }, {$pull: {usersLiked: req.body.userId}, $inc: {likes: -1}})
+            .then(() => res.status(200).json({ message: 'Like modifié !'}))
+            .catch(error => res.status(400).json({ error }));
         }
-        Thing.updateOne({ _id: req.params.id }, { ...object, _id: req.params.id })
-          .then(() => res.status(200).json({ message: 'Objet modifié !'}))
-          .catch(error => res.status(400).json({ error }));
-      }
-    )
-    .catch(error => res.status(500).json({ error }));
+        if (thing.usersDisliked.find((user) => user === req.body.userId)) {
+          Thing.updateOne({ _id: req.params.id }, {$pull: {usersDisliked: req.body.userId}, $inc: {dislikes: -1}})
+            .then(() => res.status(200).json({ message: 'Dislike modifié !'}))
+            .catch(error => res.status(400).json({ error }));
+        }
+      })
+      .catch(error => res.status(500).json({ error }));
+      
+      break;
+  
+    default:
+      break;
+  }
 
   /*if(req.body.like == 1){
-
-    const thingObject = JSON.parse(req.body.like);
-    Thing.updateOne({ _id: req.params.id }, { ...thingObject, _id: req.params.id })
-      .then(() => res.status(200).json({ message: 'Objet modifié !'}))
+    Thing.updateOne({ _id: req.params.id }, {$push: {usersLiked: req.body.userId}, $inc: {likes: 1}})
+      .then(() => res.status(200).json({ message: 'Like modifié !'}))
       .catch(error => res.status(400).json({ error }));
+  }
 
-  };
+  if(req.body.like == -1){
+    Thing.updateOne({ _id: req.params.id }, {$push: {usersDisliked: req.body.userId}, $inc: {dislikes: 1}})
+      .then(() => res.status(200).json({ message: 'Dislike modifié !'}))
+      .catch(error => res.status(400).json({ error }));
+  }
 
-  /*Thing.updateOne({ _id: req.params.id }, { ...req.body, _id: req.params.id })
-      .then(() => res.status(200).json({ message: ' Opération terminée'}))
-      .catch(error => res.status(400).json({ error }));*/
+  if(req.body.like == 0 && Thing.find({usersLiked: req.body.userId})){
+    Thing.updateOne({ _id: req.params.id }, {$pull: {usersLiked: req.body.userId}, $inc: {likes: -1}})
+      .then(() => res.status(200).json({ message: 'Like modifié !'}))
+      .catch(error => res.status(400).json({ error }));
+  }
+
+  if(req.body.like == 0 && Thing.find({usersDisliked: req.body.userId})){
+    Thing.updateOne({ _id: req.params.id }, {$pull: {usersDisliked: req.body.userId}, $inc: {dislikes: -1}})
+      .then(() => res.status(200).json({ message: 'Dislike modifié !'}))
+      .catch(error => res.status(400).json({ error }));
+  }*/
 };
