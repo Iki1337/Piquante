@@ -1,16 +1,16 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const MaskData = require('maskdata');
+const MaskData = require('maskdata'); // Paquet pour le masquage des emails
 
-const emailMask2Options = {
+const emailMask2Options = {// Configuration de maskdata
   maskWith: "*", 
   unmaskedStartCharactersBeforeAt: 3,
   unmaskedEndCharactersAfterAt: 2,
   maskAtTheRate: false
 };
 
-exports.signup = (req, res, next) => {
+exports.signup = (req, res, next) => { // Permet la création d'un compte
   bcrypt.hash(req.body.password, 10)
     .then(hash => {
       const user = new User({
@@ -24,7 +24,7 @@ exports.signup = (req, res, next) => {
   .catch(error => res.status(500).json({error}));
 };
 
-exports.login = (req, res, next) => {
+exports.login = (req, res, next) => { // Permet la connexion a un compte
   User.findOne({ email: MaskData.maskEmail2(req.body.email, emailMask2Options) })
     .then(user => {
       if (!user) {
