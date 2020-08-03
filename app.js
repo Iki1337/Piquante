@@ -7,8 +7,9 @@ const helmet = require('helmet');
 const stuffRoutes = require('./routes/stuff');
 const userRoutes = require('./routes//user');
 
+const config = require('./config');
 
-mongoose.connect('mongodb+srv://adminP6:PoRsWS1S0EOuicO5@cluster0-rbuau.mongodb.net/projet6OcDevWeb?retryWrites=true&w=majority',
+mongoose.connect('mongodb+srv://'+ config.idAdmin + ':' + config.pwd + '@cluster0-rbuau.mongodb.net/' + config.bdd + '?retryWrites=true&w=majority',
   { useNewUrlParser: true,
     useUnifiedTopology: true})
   .then(() => console.log('Connexion à MongoDB réussie !'))
